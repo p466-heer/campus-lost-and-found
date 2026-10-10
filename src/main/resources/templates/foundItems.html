@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Campus Lost & Found</title>
+</head>
+<body>
+<h1>Campus Lost & Found Board</h1>
+
+<p><a th:href="@{/items/report}">Report a Found Item</a></p>
+
+<h2>Found Items</h2>
+
+<p th:if="${items == null or !items.iterator().hasNext()}">
+    No found items have been reported yet.
+</p>
+
+<div th:each="item : ${items}">
+    <h3 th:text="${item.name}">Item Name</h3>
+    <p th:text="${item.description}">Description</p>
+    <p>
+        <strong>Found at:</strong>
+        <span th:text="${item.foundLocation}">Location</span>
+    </p>
+    <hr>
+</div>
+</body>
+</html>
