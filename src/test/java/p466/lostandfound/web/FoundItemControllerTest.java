@@ -10,6 +10,7 @@ import p466.lostandfound.data.FoundItemRepository;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @WebMvcTest(FoundItemController.class)
 class FoundItemControllerTest {
@@ -35,4 +36,16 @@ class FoundItemControllerTest {
                 .andExpect(view().name("reportItem"))
                 .andExpect(model().attributeExists("foundItem"));
     }
+
+    @Test
+    void shouldRejectEmptyReport() throws Exception {
+        mockMvc.perform(post("/items/report")
+                        .param("name", "")
+                        .param("description", "")
+                        .param("foundLocation", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportItem"))
+                .andExpect(model().hasErrors());
+    }
+
 }
