@@ -1,3 +1,4 @@
+
 package p466.lostandfound.web;
 
 import org.junit.jupiter.api.Test;
@@ -7,10 +8,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import p466.lostandfound.data.FoundItemRepository;
+import p466.lostandfound.user.AppUserRepository;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(FoundItemController.class)
 class FoundItemControllerTest {
@@ -20,6 +22,9 @@ class FoundItemControllerTest {
 
     @MockitoBean
     private FoundItemRepository foundItemRepository;
+
+    @MockitoBean
+    private AppUserRepository userRepository;
 
     @Test
     void shouldShowFoundItemsPage() throws Exception {
@@ -47,5 +52,4 @@ class FoundItemControllerTest {
                 .andExpect(view().name("reportItem"))
                 .andExpect(model().hasErrors());
     }
-
 }

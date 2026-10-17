@@ -26,6 +26,8 @@ public class FoundItem {
 
     private LocalDateTime dateReported;
 
+    private Long reportedByUserId;
+
     public FoundItem() {
     }
 
@@ -75,4 +77,13 @@ public class FoundItem {
     public void setDateReported(LocalDateTime dateReported) {
         this.dateReported = dateReported;
     }
+
+    public Long getReportedByUserId() {
+        return reportedByUserId;
+    }
+
+    public void setReportedByUserId(Long reportedByUserId) {
+        this.reportedByUserId = reportedByUserId;
+    }
+
 }
