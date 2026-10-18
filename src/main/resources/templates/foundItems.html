@@ -11,6 +11,10 @@
 
 <h2>Found Items</h2>
 
+<p th:if="${param.claimed}" style="color: green;">
+    Your claim has been submitted successfully and is pending review.
+</p>
+
 <p th:if="${items == null or !items.iterator().hasNext()}">
     No found items have been reported yet.
 </p>
@@ -22,6 +26,11 @@
         <strong>Found at:</strong>
         <span th:text="${item.foundLocation}">Location</span>
     </p>
+
+    <p>
+        <a th:href="@{/items/{id}/claim(id=${item.id})}">Claim Item</a>
+    </p>
+
     <hr>
 </div>
 </body>

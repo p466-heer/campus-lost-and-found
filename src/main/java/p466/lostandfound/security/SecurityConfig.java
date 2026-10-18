@@ -14,12 +14,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 @Configuration
 public class SecurityConfig {
 
-
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/", "/items", "/register", "/login",
                                 "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
@@ -30,17 +30,19 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())
                 )
-                .formLogin(form -> form.permitAll())
+                .formLogin(form -> form
+                        .defaultSuccessUrl("/items", true)
+                        .permitAll()
+                )
                 .logout(logout -> logout.permitAll());
 
         return http.build();
     }
 
-
     @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public UserDetailsService userDetailsService(AppUserRepository userRepository) {
@@ -55,5 +57,4 @@ public class SecurityConfig {
                     .build();
         };
     }
-
 }
