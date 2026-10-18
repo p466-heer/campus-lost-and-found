@@ -1,4 +1,5 @@
 package p466.lostandfound;
+
 import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
@@ -25,6 +26,8 @@ public class FoundItem {
     private String foundLocation;
 
     private LocalDateTime dateReported;
+
+    private Long reportedByUserId;
 
     public FoundItem() {
     }
@@ -75,4 +78,13 @@ public class FoundItem {
     public void setDateReported(LocalDateTime dateReported) {
         this.dateReported = dateReported;
     }
+
+    public Long getReportedByUserId() {
+        return reportedByUserId;
+    }
+
+    public void setReportedByUserId(Long reportedByUserId) {
+        this.reportedByUserId = reportedByUserId;
+    }
+
 }

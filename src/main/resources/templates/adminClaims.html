@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Pending Claims</title>
+</head>
+<body>
+
+<h1>Luddy Administrator Dashboard</h1>
+<h2>Pending Item Claims</h2>
+
+<p>Review claims submitted by students for found items.</p>
+
+<p th:if="${param.approved}" style="color: green;">
+    Claim approved successfully.
+</p>
+
+<p th:if="${param.declined}" style="color: green;">
+    Claim declined successfully.
+</p>
+
+<p th:if="${param.infoRequested}" style="color: green;">
+    More information requested successfully.
+</p>
+
+<p th:if="${#lists.isEmpty(claims)}">
+    There are currently no pending claims.
+</p>
+
+<div th:each="claim : ${claims}">
+    <h3>Claim #<span th:text="${claim.id}">1</span></h3>
+
+    <p>
+        <strong>Found Item ID:</strong>
+        <span th:text="${claim.foundItemId}">1</span>
+    </p>
+
+    <p>
+        <strong>Student ID:</strong>
+        <span th:text="${claim.studentId}">1</span>
+    </p>
+
+    <p>
+        <strong>Explanation:</strong>
+        <span th:text="${claim.explanation}">Explanation</span>
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        <span th:text="${claim.status}">PENDING</span>
+    </p>
+
+    <p>
+        <strong>Submitted:</strong>
+        <span th:text="${claim.dateSubmitted}">Date</span>
+    </p>
+
+    <form th:action="@{/admin/claims/{id}/approve(id=${claim.id})}"
+          method="post">
+        <button type="submit">Approve Claim</button>
+    </form>
+
+    <form th:action="@{/admin/claims/{id}/decline(id=${claim.id})}"
+          method="post">
+        <button type="submit">Decline Claim</button>
+    </form>
+
+    <form th:action="@{/admin/claims/{id}/request-info(id=${claim.id})}"
+          method="post">
+        <button type="submit">Request More Information</button>
+    </form>
+
+    <hr>
+</div>
+
+<p><a th:href="@{/items}">Back to Found Items</a></p>
+
+</body>
+</html>

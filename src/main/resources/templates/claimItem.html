@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Claim Found Item</title>
+</head>
+<body>
+
+<h1>Claim Found Item</h1>
+
+<h2 th:text="${item.name}">Item Name</h2>
+
+<p>
+  <strong>Description:</strong>
+  <span th:text="${item.description}"></span>
+</p>
+
+<p>
+  <strong>Found Location:</strong>
+  <span th:text="${item.foundLocation}"></span>
+</p>
+
+<p>If this item belongs to you, explain why you believe it is yours.</p>
+
+<p th:if="${error}" th:text="${error}" style="color: red;"></p>
+
+<form th:action="@{/items/{id}/claim(id=${item.id})}" method="post">
+
+  <label for="explanation">Explanation:</label>
+  <br>
+
+  <textarea id="explanation"
+            name="explanation"
+            rows="5"
+            cols="50"
+            maxlength="1000"
+            required></textarea>
+
+  <br><br>
+
+  <button type="submit">Submit Claim</button>
+
+</form>
+
+<p><a th:href="@{/items}">Back to Found Items</a></p>
+
+</body>
+</html>
