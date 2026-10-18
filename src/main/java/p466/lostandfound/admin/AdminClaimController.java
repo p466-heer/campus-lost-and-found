@@ -36,6 +36,18 @@ public class AdminClaimController {
                     HttpStatus.CONFLICT, "This claim has already been reviewed");
         }
 
+        boolean alreadyApproved = claimRepository
+                .findByFoundItemId(claim.getFoundItemId())
+                .stream()
+                .anyMatch(otherClaim ->
+                        "APPROVED".equals(otherClaim.getStatus()));
+
+        if (alreadyApproved) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Another claim for this item has already been approved");
+        }
+
         claim.setStatus("APPROVED");
         claimRepository.save(claim);
 

@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import p466.lostandfound.claim.ItemClaim;
 import p466.lostandfound.claim.ItemClaimRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,6 +30,9 @@ class AdminClaimControllerTest {
 
         when(claimRepository.findById(1L))
                 .thenReturn(Optional.of(claim));
+
+        when(claimRepository.findByFoundItemId(1L))
+                .thenReturn(List.of(claim));
 
         String result = controller.approveClaim(1L);
 
@@ -79,6 +83,29 @@ class AdminClaimControllerTest {
         );
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        verify(claimRepository, never()).save(any());
+    }
+
+    @Test
+    void cannotApproveTwoClaimsForSameItem() {
+        ItemClaim firstClaim = new ItemClaim(1L, 2L, "My wallet");
+        firstClaim.setStatus("APPROVED");
+
+        ItemClaim secondClaim = new ItemClaim(1L, 3L, "My wallet too");
+
+        when(claimRepository.findById(2L))
+                .thenReturn(Optional.of(secondClaim));
+
+        when(claimRepository.findByFoundItemId(1L))
+                .thenReturn(List.of(firstClaim, secondClaim));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> controller.approveClaim(2L)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("PENDING", secondClaim.getStatus());
         verify(claimRepository, never()).save(any());
     }
 }
