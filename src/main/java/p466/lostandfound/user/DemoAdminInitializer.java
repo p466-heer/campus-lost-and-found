@@ -1,4 +1,3 @@
-
 package p466.lostandfound.user;
 
 import org.springframework.boot.CommandLineRunner;

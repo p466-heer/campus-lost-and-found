@@ -4,8 +4,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
+import p466.lostandfound.FoundItem;
 import p466.lostandfound.claim.ItemClaim;
 import p466.lostandfound.claim.ItemClaimRepository;
+import p466.lostandfound.data.FoundItemRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +19,21 @@ import static org.mockito.Mockito.*;
 class AdminClaimControllerTest {
 
     private ItemClaimRepository claimRepository;
+    private FoundItemRepository foundItemRepository;
     private AdminClaimController controller;
 
     @BeforeEach
     void setUp() {
         claimRepository = mock(ItemClaimRepository.class);
-        controller = new AdminClaimController(claimRepository);
+        foundItemRepository = mock(FoundItemRepository.class);
+
+        controller = new AdminClaimController(
+                claimRepository,
+                foundItemRepository
+        );
+
+        when(foundItemRepository.findByIdForUpdate(anyLong()))
+                .thenReturn(Optional.of(new FoundItem()));
     }
 
     @Test
@@ -31,6 +43,9 @@ class AdminClaimControllerTest {
         when(claimRepository.findById(1L))
                 .thenReturn(Optional.of(claim));
 
+        when(claimRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(claim));
+
         when(claimRepository.findByFoundItemId(1L))
                 .thenReturn(List.of(claim));
 
@@ -38,6 +53,8 @@ class AdminClaimControllerTest {
 
         assertEquals("APPROVED", claim.getStatus());
         assertEquals("redirect:/admin/claims?approved", result);
+
+        verify(foundItemRepository).findByIdForUpdate(1L);
         verify(claimRepository).save(claim);
     }
 
@@ -45,7 +62,7 @@ class AdminClaimControllerTest {
     void declineClaimShouldUpdateStatus() {
         ItemClaim claim = new ItemClaim(1L, 2L, "My wallet");
 
-        when(claimRepository.findById(1L))
+        when(claimRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(claim));
 
         String result = controller.declineClaim(1L);
@@ -59,7 +76,7 @@ class AdminClaimControllerTest {
     void requestMoreInformationShouldUpdateStatus() {
         ItemClaim claim = new ItemClaim(1L, 2L, "My wallet");
 
-        when(claimRepository.findById(1L))
+        when(claimRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(claim));
 
         String result = controller.requestMoreInformation(1L);
@@ -75,6 +92,9 @@ class AdminClaimControllerTest {
         claim.setStatus("DECLINED");
 
         when(claimRepository.findById(1L))
+                .thenReturn(Optional.of(claim));
+
+        when(claimRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(claim));
 
         ResponseStatusException exception = assertThrows(
@@ -94,6 +114,9 @@ class AdminClaimControllerTest {
         ItemClaim secondClaim = new ItemClaim(1L, 3L, "My wallet too");
 
         when(claimRepository.findById(2L))
+                .thenReturn(Optional.of(secondClaim));
+
+        when(claimRepository.findByIdForUpdate(2L))
                 .thenReturn(Optional.of(secondClaim));
 
         when(claimRepository.findByFoundItemId(1L))

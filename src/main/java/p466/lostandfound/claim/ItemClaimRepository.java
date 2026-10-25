@@ -1,7 +1,9 @@
 package p466.lostandfound.claim;
 
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jdbc.repository.query.Query;
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemClaimRepository extends CrudRepository<ItemClaim, Long> {
 
@@ -10,4 +12,7 @@ public interface ItemClaimRepository extends CrudRepository<ItemClaim, Long> {
     List<ItemClaim> findByStudentId(Long studentId);
 
     List<ItemClaim> findByStatus(String status);
+
+    @Query("SELECT * FROM item_claim WHERE id = :id FOR UPDATE")
+    Optional<ItemClaim> findByIdForUpdate(Long id);
 }
