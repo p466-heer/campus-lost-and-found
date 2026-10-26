@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Pending Claims</title>
+    <title>Admin - Claims</title>
 </head>
 <body>
 
 <h1>Luddy Administrator Dashboard</h1>
-<h2>Pending Item Claims</h2>
+<h2>Item Claims</h2>
 
 <p>Review claims submitted by students for found items.</p>
 
@@ -24,7 +24,7 @@
 </p>
 
 <p th:if="${#lists.isEmpty(claims)}">
-    There are currently no pending claims.
+    There are currently no claims to review.
 </p>
 
 <div th:each="claim : ${claims}">
@@ -55,20 +55,48 @@
         <span th:text="${claim.dateSubmitted}">Date</span>
     </p>
 
-    <form th:action="@{/admin/claims/{id}/approve(id=${claim.id})}"
-          method="post">
-        <button type="submit">Approve Claim</button>
-    </form>
+    <p th:if="${claim.adminRequest != null}">
+        <strong>Information Requested:</strong>
+        <span th:text="${claim.adminRequest}"></span>
+    </p>
 
-    <form th:action="@{/admin/claims/{id}/decline(id=${claim.id})}"
-          method="post">
-        <button type="submit">Decline Claim</button>
-    </form>
+    <p th:if="${claim.studentResponse != null}">
+        <strong>Student Response:</strong>
+        <span th:text="${claim.studentResponse}"></span>
+    </p>
 
-    <form th:action="@{/admin/claims/{id}/request-info(id=${claim.id})}"
-          method="post">
-        <button type="submit">Request More Information</button>
-    </form>
+    <div th:if="${claim.status == 'PENDING' or claim.status == 'MORE_INFO_RECEIVED'}">
+
+        <form th:action="@{/admin/claims/{id}/approve(id=${claim.id})}"
+              method="post">
+            <button type="submit">Approve Claim</button>
+        </form>
+
+        <form th:action="@{/admin/claims/{id}/decline(id=${claim.id})}"
+              method="post">
+            <button type="submit">Decline Claim</button>
+        </form>
+
+        <form th:action="@{/admin/claims/{id}/request-info(id=${claim.id})}"
+              method="post">
+
+            <label for="adminRequest">What additional information is needed?</label>
+
+            <textarea th:id="'adminRequest-' + ${claim.id}"
+                      name="adminRequest"
+                      rows="3"
+                      cols="50"
+                      required></textarea>
+
+            <br>
+            <button type="submit">Request More Information</button>
+        </form>
+
+    </div>
+
+    <p th:if="${claim.status == 'MORE_INFO_REQUESTED'}">
+        Waiting for the student to provide more information.
+    </p>
 
     <hr>
 </div>

@@ -14,6 +14,8 @@ public class ItemClaim {
     private Long foundItemId;
     private Long studentId;
     private String explanation;
+    private String adminRequest;
+    private String studentResponse;
     private String status;
     private LocalDateTime dateSubmitted;
 
@@ -58,6 +60,22 @@ public class ItemClaim {
 
     public void setExplanation(String explanation) {
         this.explanation = explanation;
+    }
+
+    public String getAdminRequest() {
+        return adminRequest;
+    }
+
+    public void setAdminRequest(String adminRequest) {
+        this.adminRequest = adminRequest;
+    }
+
+    public String getStudentResponse() {
+        return studentResponse;
+    }
+
+    public void setStudentResponse(String studentResponse) {
+        this.studentResponse = studentResponse;
     }
 
     public String getStatus() {

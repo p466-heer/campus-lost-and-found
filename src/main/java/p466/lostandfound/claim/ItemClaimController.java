@@ -1,5 +1,6 @@
 package p466.lostandfound.claim;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import p466.lostandfound.FoundItem;
 import p466.lostandfound.data.FoundItemRepository;
@@ -31,8 +33,8 @@ public class ItemClaimController {
     @GetMapping("/items/{id}/claim")
     public String showClaimForm(@PathVariable Long id, Model model) {
         FoundItem item = itemRepository.findById(id)
-                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.NOT_FOUND));
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         model.addAttribute("item", item);
         return "claimItem";
@@ -45,8 +47,8 @@ public class ItemClaimController {
                               Model model) {
 
         FoundItem item = itemRepository.findById(id)
-                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.NOT_FOUND));
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (explanation == null || explanation.isBlank()
                 || explanation.length() > 1000) {
@@ -56,8 +58,7 @@ public class ItemClaimController {
             return "claimItem";
         }
 
-        AppUser student = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new IllegalStateException("User not found"));
+        AppUser student = getStudent(authentication);
 
         ItemClaim claim = new ItemClaim(
                 item.getId(),
@@ -68,5 +69,56 @@ public class ItemClaimController {
         claimRepository.save(claim);
 
         return "redirect:/items?claimed";
+    }
+
+    @GetMapping("/my-claims")
+    public String showMyClaims(Authentication authentication, Model model) {
+        AppUser student = getStudent(authentication);
+
+        model.addAttribute("claims",
+                claimRepository.findByStudentId(student.getId()));
+
+        return "myClaims";
+    }
+
+    @PostMapping("/my-claims/{id}/respond")
+    public String respondToRequest(@PathVariable Long id,
+                                   @RequestParam String studentResponse,
+                                   Authentication authentication) {
+
+        AppUser student = getStudent(authentication);
+
+        ItemClaim claim = claimRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!claim.getStudentId().equals(student.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        if (!"MORE_INFO_REQUESTED".equals(claim.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "This claim is not waiting for more information");
+        }
+
+        if (studentResponse == null || studentResponse.isBlank()
+                || studentResponse.length() > 1000) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Please provide a response (up to 1000 characters)");
+        }
+
+        claim.setStudentResponse(studentResponse.trim());
+        claim.setStatus("MORE_INFO_RECEIVED");
+        claimRepository.save(claim);
+
+        return "redirect:/my-claims?responded";
+    }
+
+    private AppUser getStudent(Authentication authentication) {
+        return userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() ->
+                        new IllegalStateException("User not found"));
     }
 }

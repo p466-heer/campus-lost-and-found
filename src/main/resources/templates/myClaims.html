@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>My Claims</title>
+</head>
+<body>
+
+<h1>My Item Claims</h1>
+
+<p>View your submitted claims and respond to admin requests.</p>
+
+<p th:if="${param.responded}" style="color: green;">
+  Your response was submitted successfully.
+</p>
+
+<p th:if="${#lists.isEmpty(claims)}">
+  You have not submitted any claims yet.
+</p>
+
+<div th:each="claim : ${claims}">
+
+  <h3>Claim #<span th:text="${claim.id}">1</span></h3>
+
+  <p>
+    <strong>Found Item ID:</strong>
+    <span th:text="${claim.foundItemId}">1</span>
+  </p>
+
+  <p>
+    <strong>Your Explanation:</strong>
+    <span th:text="${claim.explanation}"></span>
+  </p>
+
+  <p>
+    <strong>Status:</strong>
+    <span th:text="${claim.status}"></span>
+  </p>
+
+  <p th:if="${claim.adminRequest != null}">
+    <strong>Admin Request:</strong>
+    <span th:text="${claim.adminRequest}"></span>
+  </p>
+
+  <p th:if="${claim.studentResponse != null}">
+    <strong>Your Response:</strong>
+    <span th:text="${claim.studentResponse}"></span>
+  </p>
+
+  <form th:if="${claim.status == 'MORE_INFO_REQUESTED'}"
+        th:action="@{/my-claims/{id}/respond(id=${claim.id})}"
+        method="post">
+
+    <label th:for="'response-' + ${claim.id}">
+      Additional Information:
+    </label>
+
+    <br>
+
+    <textarea th:id="'response-' + ${claim.id}"
+              name="studentResponse"
+              rows="4"
+              cols="50"
+              maxlength="1000"
+              required></textarea>
+
+    <br>
+
+    <button type="submit">Submit Additional Information</button>
+  </form>
+
+  <hr>
+
+</div>
+
+<p><a th:href="@{/items}">Back to Found Items</a></p>
+
+</body>
+</html>

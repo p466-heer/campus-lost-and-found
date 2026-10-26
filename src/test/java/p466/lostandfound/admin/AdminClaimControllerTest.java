@@ -79,10 +79,52 @@ class AdminClaimControllerTest {
         when(claimRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(claim));
 
-        String result = controller.requestMoreInformation(1L);
+        String result = controller.requestMoreInformation(
+                1L, "What color is the wallet?");
 
         assertEquals("MORE_INFO_REQUESTED", claim.getStatus());
+        assertEquals("What color is the wallet?", claim.getAdminRequest());
         assertEquals("redirect:/admin/claims?infoRequested", result);
+        verify(claimRepository).save(claim);
+    }
+
+    @Test
+    void adminCanRequestMoreInformationAgain() {
+        ItemClaim claim = new ItemClaim(1L, 2L, "My wallet");
+        claim.setStatus("MORE_INFO_RECEIVED");
+        claim.setStudentResponse("It is black.");
+
+        when(claimRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(claim));
+
+        controller.requestMoreInformation(
+                1L, "Does it have any cards inside?");
+
+        assertEquals("MORE_INFO_REQUESTED", claim.getStatus());
+        assertEquals("Does it have any cards inside?",
+                claim.getAdminRequest());
+        assertNull(claim.getStudentResponse());
+        verify(claimRepository).save(claim);
+    }
+
+    @Test
+    void adminCanApproveAfterStudentResponds() {
+        ItemClaim claim = new ItemClaim(1L, 2L, "My wallet");
+        claim.setStatus("MORE_INFO_RECEIVED");
+        claim.setStudentResponse("It is black.");
+
+        when(claimRepository.findById(1L))
+                .thenReturn(Optional.of(claim));
+
+        when(claimRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(claim));
+
+        when(claimRepository.findByFoundItemId(1L))
+                .thenReturn(List.of(claim));
+
+        controller.approveClaim(1L);
+
+        assertEquals("APPROVED", claim.getStatus());
         verify(claimRepository).save(claim);
     }
 

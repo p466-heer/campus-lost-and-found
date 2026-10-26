@@ -1,5 +1,8 @@
 package p466.lostandfound.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import p466.lostandfound.claim.ItemClaim;
@@ -28,7 +32,12 @@ public class AdminClaimController {
 
     @GetMapping("/admin/claims")
     public String showPendingClaims(Model model) {
-        model.addAttribute("claims", claimRepository.findByStatus("PENDING"));
+        List<ItemClaim> claims = new ArrayList<>();
+        claims.addAll(claimRepository.findByStatus("PENDING"));
+        claims.addAll(claimRepository.findByStatus("MORE_INFO_REQUESTED"));
+        claims.addAll(claimRepository.findByStatus("MORE_INFO_RECEIVED"));
+
+        model.addAttribute("claims", claims);
         return "adminClaims";
     }
 
@@ -40,21 +49,18 @@ public class AdminClaimController {
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // Lock the found item first so approvals for the same
-        // item cannot happen simultaneously.
         foundItemRepository.findByIdForUpdate(claim.getFoundItemId())
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // Lock the individual claim before reviewing its status.
         claim = claimRepository.findByIdForUpdate(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (!"PENDING".equals(claim.getStatus())) {
+        if (!canReview(claim)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "This claim has already been reviewed");
+                    "This claim cannot be approved");
         }
 
         boolean alreadyApproved = claimRepository
@@ -83,10 +89,10 @@ public class AdminClaimController {
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (!"PENDING".equals(claim.getStatus())) {
+        if (!canReview(claim)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "This claim has already been reviewed");
+                    "This claim cannot be declined");
         }
 
         claim.setStatus("DECLINED");
@@ -97,21 +103,36 @@ public class AdminClaimController {
 
     @Transactional
     @PostMapping("/admin/claims/{id}/request-info")
-    public String requestMoreInformation(@PathVariable Long id) {
+    public String requestMoreInformation(
+            @PathVariable Long id,
+            @RequestParam String adminRequest) {
 
         ItemClaim claim = claimRepository.findByIdForUpdate(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (!"PENDING".equals(claim.getStatus())) {
+        if (!canReview(claim)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "This claim has already been reviewed");
+                    "This claim cannot request more information");
         }
 
+        if (adminRequest.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Please enter the information needed");
+        }
+
+        claim.setAdminRequest(adminRequest.trim());
+        claim.setStudentResponse(null);
         claim.setStatus("MORE_INFO_REQUESTED");
         claimRepository.save(claim);
 
         return "redirect:/admin/claims?infoRequested";
+    }
+
+    private boolean canReview(ItemClaim claim) {
+        return "PENDING".equals(claim.getStatus())
+                || "MORE_INFO_RECEIVED".equals(claim.getStatus());
     }
 }
