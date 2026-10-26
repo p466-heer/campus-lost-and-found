@@ -1,5 +1,6 @@
 package p466.lostandfound.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,21 +16,34 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            @Value("${spring.h2.console.enabled:false}") boolean h2ConsoleEnabled
+    ) throws Exception {
+
         http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/", "/items", "/register", "/login",
-                                "/css/**", "/js/**", "/images/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**")
-                )
-                .headers(headers -> headers
-                        .frameOptions(frame -> frame.sameOrigin())
-                )
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/actuator/health").permitAll();
+
+                    if (h2ConsoleEnabled) {
+                        auth.requestMatchers("/h2-console/**").permitAll();
+                    }
+
+                    auth.requestMatchers("/admin/**").hasRole("ADMIN")
+                            .requestMatchers("/", "/items", "/register", "/login",
+                                    "/css/**", "/js/**", "/images/**").permitAll()
+                            .anyRequest().authenticated();
+                })
+                .csrf(csrf -> {
+                    if (h2ConsoleEnabled) {
+                        csrf.ignoringRequestMatchers("/h2-console/**");
+                    }
+                })
+                .headers(headers -> {
+                    if (h2ConsoleEnabled) {
+                        headers.frameOptions(frame -> frame.sameOrigin());
+                    }
+                })
                 .formLogin(form -> form
                         .defaultSuccessUrl("/items", true)
                         .permitAll()
