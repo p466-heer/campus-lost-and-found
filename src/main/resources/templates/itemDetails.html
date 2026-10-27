@@ -1,6 +1,5 @@
-
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Found Item Details</title>
@@ -29,12 +28,14 @@
 <!-- CLFB-17: Display item status -->
 <p>
   <strong>Status:</strong>
-  <span th:if="${item.resolved}" style="color: green; font-weight: bold;">
-    Resolved - Returned to Owner
-  </span>
-  <span th:unless="${item.resolved}" style="color: blue; font-weight: bold;">
-    Available
-  </span>
+  <span th:if="${item.resolved}"
+        style="color: green; font-weight: bold;">
+        Resolved - Returned to Owner
+    </span>
+  <span th:unless="${item.resolved}"
+        style="color: blue; font-weight: bold;">
+        Available
+    </span>
 </p>
 
 <p th:if="${item.resolved and item.dateResolved != null}">
@@ -57,11 +58,13 @@
   This item has already been returned and can no longer be claimed.
 </p>
 
-<!-- Admin-only action to mark item as resolved -->
-<div th:if="${isAdmin and !item.resolved}"
+<!-- CLFB-17: Admin-only action to mark item as resolved -->
+<div th:if="${isAdmin and !item.resolved}">
   <form th:action="@{/admin/items/{id}/resolve(id=${item.id})}"
         method="post">
+
     <button type="submit">Mark as Resolved</button>
+
   </form>
 </div>
 
