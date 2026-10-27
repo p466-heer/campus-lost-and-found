@@ -1,11 +1,13 @@
+
 package p466.lostandfound;
 
 import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
 
 @Table("FOUND_ITEM")
 public class FoundItem {
@@ -28,6 +30,12 @@ public class FoundItem {
     private LocalDateTime dateReported;
 
     private Long reportedByUserId;
+
+
+    private boolean resolved = false;
+
+
+    private LocalDateTime dateResolved;
 
     public FoundItem() {
     }
@@ -87,4 +95,19 @@ public class FoundItem {
         this.reportedByUserId = reportedByUserId;
     }
 
+    public boolean isResolved() {
+        return resolved;
+    }
+
+    public void setResolved(boolean resolved) {
+        this.resolved = resolved;
+    }
+
+    public LocalDateTime getDateResolved() {
+        return dateResolved;
+    }
+
+    public void setDateResolved(LocalDateTime dateResolved) {
+        this.dateResolved = dateResolved;
+    }
 }

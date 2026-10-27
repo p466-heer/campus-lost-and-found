@@ -31,10 +31,16 @@ public class ItemClaimController {
     }
 
     @GetMapping("/items/{id}/claim")
-    public String showClaimForm(@PathVariable Long id, Model model) {
+    public String showClaimForm(@PathVariable Long id,
+                                Authentication authentication,
+                                Model model) {
+
         FoundItem item = itemRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        AppUser student = getStudent(authentication);
+        checkClaimAllowed(item, student);
 
         model.addAttribute("item", item);
         return "claimItem";
@@ -50,6 +56,9 @@ public class ItemClaimController {
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+        AppUser student = getStudent(authentication);
+        checkClaimAllowed(item, student);
+
         if (explanation == null || explanation.isBlank()
                 || explanation.length() > 1000) {
             model.addAttribute("item", item);
@@ -57,8 +66,6 @@ public class ItemClaimController {
                     "Please provide an explanation (up to 1000 characters).");
             return "claimItem";
         }
-
-        AppUser student = getStudent(authentication);
 
         ItemClaim claim = new ItemClaim(
                 item.getId(),
@@ -114,6 +121,31 @@ public class ItemClaimController {
         claimRepository.save(claim);
 
         return "redirect:/my-claims?responded";
+    }
+
+    private void checkClaimAllowed(FoundItem item, AppUser student) {
+        if (item.isResolved()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "This item has already been resolved");
+        }
+
+        if (student.getId().equals(item.getReportedByUserId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You cannot claim an item you reported");
+        }
+
+        boolean alreadyApproved = claimRepository
+                .findByFoundItemId(item.getId())
+                .stream()
+                .anyMatch(claim -> "APPROVED".equals(claim.getStatus()));
+
+        if (alreadyApproved) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "This item has already been claimed");
+        }
     }
 
     private AppUser getStudent(Authentication authentication) {

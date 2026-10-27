@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Campus Lost & Found</title>
@@ -10,6 +10,7 @@
 
 <p><a th:href="@{/items/report}">Report a Found Item</a></p>
 <p><a th:href="@{/my-claims}">My Claims</a></p>
+<p><a th:href="@{/items/resolved}">Recently Resolved Items</a></p>
 
 <h2>Found Items</h2>
 
@@ -48,9 +49,29 @@
     </p>
 
     <p>
+        <strong>Status:</strong>
+        <span th:if="${item.resolved}" style="color: green;">
+            Resolved - Returned to Owner
+        </span>
+        <span th:unless="${item.resolved}" style="color: blue;">
+            Available
+        </span>
+    </p>
+
+    <p th:if="${!item.resolved and
+               (currentUserId == null or currentUserId != item.reportedByUserId)}">
         <a th:href="@{/items/{id}/claim(id=${item.id})}">
             Claim Item
         </a>
+    </p>
+
+    <p th:if="${!item.resolved and
+               currentUserId != null and currentUserId == item.reportedByUserId}">
+        You reported this item and cannot claim it.
+    </p>
+
+    <p th:if="${item.resolved}">
+        This item is no longer available to claim.
     </p>
 
     <hr>

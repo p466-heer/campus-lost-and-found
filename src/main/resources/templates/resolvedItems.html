@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Recently Resolved Items</title>
+</head>
+<body>
+
+<h1>Recently Resolved Items</h1>
+
+<p>These found items have been returned and marked as resolved.</p>
+
+<p th:if="${#lists.isEmpty(items)}">
+    No items have been resolved yet.
+</p>
+
+<table th:unless="${#lists.isEmpty(items)}" border="1" cellpadding="8">
+    <thead>
+    <tr>
+        <th>Item Name</th>
+        <th>Found Location</th>
+        <th>Date Resolved</th>
+        <th>Status</th>
+        <th>Details</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${items}">
+        <td th:text="${item.name}">Item Name</td>
+        <td th:text="${item.foundLocation}">Location</td>
+        <td th:text="${item.dateResolved}">Date</td>
+        <td style="color: green;">Resolved</td>
+        <td>
+            <a th:href="@{/items/{id}(id=${item.id})}">View Details</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<p>
+    <a th:href="@{/items}">Back to Found Items</a>
+</p>
+
+</body>
+</html>

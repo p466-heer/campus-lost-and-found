@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -25,11 +26,44 @@
   <span th:text="${item.dateReported}">Date</span>
 </p>
 
+<!-- CLFB-17: Display item status -->
 <p>
+  <strong>Status:</strong>
+  <span th:if="${item.resolved}" style="color: green; font-weight: bold;">
+    Resolved - Returned to Owner
+  </span>
+  <span th:unless="${item.resolved}" style="color: blue; font-weight: bold;">
+    Available
+  </span>
+</p>
+
+<p th:if="${item.resolved and item.dateResolved != null}">
+  <strong>Date Resolved:</strong>
+  <span th:text="${item.dateResolved}">Date</span>
+</p>
+
+<!-- Claim only if item is available and user is not the reporter -->
+<p th:if="${canClaim}">
   <a th:href="@{/items/{id}/claim(id=${item.id})}">
     Claim This Item
   </a>
 </p>
+
+<p th:if="${!canClaim and !item.resolved}">
+  You cannot claim this item because you reported it.
+</p>
+
+<p th:if="${item.resolved}">
+  This item has already been returned and can no longer be claimed.
+</p>
+
+<!-- Admin-only action to mark item as resolved -->
+<div th:if="${#authorization.expression('hasRole(''ADMIN'')') and !item.resolved}">
+  <form th:action="@{/admin/items/{id}/resolve(id=${item.id})}"
+        method="post">
+    <button type="submit">Mark as Resolved</button>
+  </form>
+</div>
 
 <p>
   <a th:href="@{/items}">Back to Found Items</a>

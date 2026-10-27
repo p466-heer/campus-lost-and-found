@@ -1,3 +1,4 @@
+
 package p466.lostandfound.security;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -30,9 +31,17 @@ public class SecurityConfig {
                     }
 
                     auth.requestMatchers("/admin/**").hasRole("ADMIN")
-                            .requestMatchers("/", "/items", "/items/{id}",
-                                    "/register", "/login",
-                                    "/css/**", "/js/**", "/images/**").permitAll()
+                            .requestMatchers(
+                                    "/",
+                                    "/items",
+                                    "/items/resolved",
+                                    "/items/{id}",
+                                    "/register",
+                                    "/login",
+                                    "/css/**",
+                                    "/js/**",
+                                    "/images/**"
+                            ).permitAll()
                             .anyRequest().authenticated();
                 })
                 .csrf(csrf -> {
