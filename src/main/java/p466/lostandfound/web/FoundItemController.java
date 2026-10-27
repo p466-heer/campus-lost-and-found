@@ -7,13 +7,18 @@ import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import p466.lostandfound.FoundItem;
 import p466.lostandfound.data.FoundItemRepository;
 import p466.lostandfound.user.AppUser;
 import p466.lostandfound.user.AppUserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class FoundItemController {
@@ -33,9 +38,37 @@ public class FoundItemController {
     }
 
     @GetMapping("/items")
-    public String showItems(Model model) {
-        model.addAttribute("items", foundItemRepository.findAll());
+    public String showItems(
+            @RequestParam(required = false) String search,
+            Model model) {
+
+        List<FoundItem> items = new ArrayList<>();
+        foundItemRepository.findAll().forEach(items::add);
+
+        if (search != null && !search.isBlank()) {
+            String keyword = search.trim().toLowerCase();
+
+            items.removeIf(item ->
+                    !item.getName().toLowerCase().contains(keyword)
+                            && !item.getDescription().toLowerCase().contains(keyword)
+                            && !item.getFoundLocation().toLowerCase().contains(keyword));
+        }
+
+        model.addAttribute("items", items);
+        model.addAttribute("search", search == null ? "" : search);
+
         return "foundItems";
+    }
+
+    @GetMapping("/items/{id}")
+    public String showItemDetails(@PathVariable Long id, Model model) {
+        FoundItem item = foundItemRepository.findById(id)
+                .orElseThrow(() ->
+                        new org.springframework.web.server.ResponseStatusException(
+                                org.springframework.http.HttpStatus.NOT_FOUND));
+
+        model.addAttribute("item", item);
+        return "itemDetails";
     }
 
     @GetMapping("/items/report")

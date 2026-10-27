@@ -5,33 +5,56 @@
     <title>Campus Lost & Found</title>
 </head>
 <body>
+
 <h1>Campus Lost & Found Board</h1>
 
 <p><a th:href="@{/items/report}">Report a Found Item</a></p>
+<p><a th:href="@{/my-claims}">My Claims</a></p>
 
 <h2>Found Items</h2>
+
+<form th:action="@{/items}" method="get">
+    <label for="search">Search Found Items:</label>
+    <input type="text"
+           id="search"
+           name="search"
+           th:value="${search}"
+           placeholder="Search by name, description, or location">
+
+    <button type="submit">Search</button>
+    <a th:href="@{/items}">Clear</a>
+</form>
 
 <p th:if="${param.claimed}" style="color: green;">
     Your claim has been submitted successfully and is pending review.
 </p>
 
-<p th:if="${items == null or !items.iterator().hasNext()}">
-    No found items have been reported yet.
+<p th:if="${#lists.isEmpty(items)}">
+    No matching found items.
 </p>
 
 <div th:each="item : ${items}">
-    <h3 th:text="${item.name}">Item Name</h3>
+
+    <h3>
+        <a th:href="@{/items/{id}(id=${item.id})}"
+           th:text="${item.name}">Item Name</a>
+    </h3>
+
     <p th:text="${item.description}">Description</p>
+
     <p>
         <strong>Found at:</strong>
         <span th:text="${item.foundLocation}">Location</span>
     </p>
 
     <p>
-        <a th:href="@{/items/{id}/claim(id=${item.id})}">Claim Item</a>
+        <a th:href="@{/items/{id}/claim(id=${item.id})}">
+            Claim Item
+        </a>
     </p>
 
     <hr>
 </div>
+
 </body>
 </html>

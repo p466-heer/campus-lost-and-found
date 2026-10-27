@@ -30,7 +30,8 @@ public class SecurityConfig {
                     }
 
                     auth.requestMatchers("/admin/**").hasRole("ADMIN")
-                            .requestMatchers("/", "/items", "/register", "/login",
+                            .requestMatchers("/", "/items", "/items/{id}",
+                                    "/register", "/login",
                                     "/css/**", "/js/**", "/images/**").permitAll()
                             .anyRequest().authenticated();
                 })

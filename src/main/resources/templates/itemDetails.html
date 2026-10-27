@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Found Item Details</title>
+</head>
+<body>
+
+<h1>Found Item Details</h1>
+
+<h2 th:text="${item.name}">Item Name</h2>
+
+<p>
+  <strong>Description:</strong>
+  <span th:text="${item.description}">Description</span>
+</p>
+
+<p>
+  <strong>Found Location:</strong>
+  <span th:text="${item.foundLocation}">Location</span>
+</p>
+
+<p>
+  <strong>Date Reported:</strong>
+  <span th:text="${item.dateReported}">Date</span>
+</p>
+
+<p>
+  <a th:href="@{/items/{id}/claim(id=${item.id})}">
+    Claim This Item
+  </a>
+</p>
+
+<p>
+  <a th:href="@{/items}">Back to Found Items</a>
+</p>
+
+</body>
+</html>
