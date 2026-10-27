@@ -13,6 +13,6 @@ public interface ItemClaimRepository extends CrudRepository<ItemClaim, Long> {
 
     List<ItemClaim> findByStatus(String status);
 
-    @Query("SELECT * FROM item_claim WHERE id = :id FOR UPDATE")
+    @Query("SELECT * FROM \"ITEM_CLAIM\" WHERE \"ID\" = :id FOR UPDATE")
     Optional<ItemClaim> findByIdForUpdate(Long id);
 }
