@@ -58,7 +58,7 @@
 </p>
 
 <!-- Admin-only action to mark item as resolved -->
-<div th:if="${#authorization.expression('hasRole(''ADMIN'')') and !item.resolved}">
+<div th:if="${isAdmin and !item.resolved}"
   <form th:action="@{/admin/items/{id}/resolve(id=${item.id})}"
         method="post">
     <button type="submit">Mark as Resolved</button>

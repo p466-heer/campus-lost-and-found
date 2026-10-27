@@ -122,8 +122,14 @@ public class FoundItemController {
             }
         }
 
+        boolean isAdmin = authentication != null
+                && authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        "ROLE_ADMIN".equals(authority.getAuthority()));
+
         model.addAttribute("item", item);
         model.addAttribute("canClaim", canClaim);
+        model.addAttribute("isAdmin", isAdmin);
 
         return "itemDetails";
     }
