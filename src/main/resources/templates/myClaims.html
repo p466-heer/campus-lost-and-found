@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -35,6 +36,13 @@
   <p>
     <strong>Status:</strong>
     <span th:text="${claim.status}"></span>
+  </p>
+
+  <!-- CLFB-16: Approval notification -->
+  <p th:if="${claim.status == 'APPROVED'}"
+     style="color: green; font-weight: bold;">
+    Your claim has been approved!
+    Your item is ready for pickup at the central lost-and-found location.
   </p>
 
   <p th:if="${claim.adminRequest != null}">
